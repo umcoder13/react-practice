@@ -136,4 +136,404 @@ html코드를 반환
 
 App.js를 변경하면 자동으로 서버가 변경을 인지해서 자동으로 변경시킴.
 
+---
 
+## First Component
+
+`components` 폴더를 추가하지만 `App.js`는 이동시키지 않음.
+
+왜냐하면 이것은 `Root Component`로 `index.js`의 시작파일에서 렌더링이 되는 주요 구성요소이기 때문
+
+또한 모든 컴포넌트들은 `App.js`안에 혹은 다른 컴포넌트 안에 중첩됨.
+
+![component_tree](https://smartcodehelper.com/wp-content/uploads/2021/06/image-4-1024x461.png)
+
+컴포넌트 트리를 만들면서 이를 확실시 하는데, 맨 위에 가장 중요한 App 컴포넌트가 있고   
+그 아래에는 다양한 사용자 지정 HTML 컴포넌트를 가짐.
+
+만드는 App이 커지면 커질수록 컴포넌트 트리도 커짐
+
+맨 위에 있는 컴포넌트만이 리액트 돔 렌더의 지시로 html페이지에 직접 렌더링됨. 
+
+다른 컴포넌트들은 렌더링 되지 않고, 컴포넌트의 html코드안에 있는 regular html component를 사용해 렌더링이 됨. 
+
+`components` 안에 `ExpenseItem.js`을 추가하고 여기에 비용 아이템을 저장함
+
+리액트로 작성된 컴포넌트는 단순히 html을 반환하는 자바스크립트 함수라는 것을 기억!
+
+ExpenseItem.js
+```js
+function ExpenseItem() {
+    return <h2>Expense item!</h2>
+}
+
+export default ExpenseItem;
+```
+
+따라서 html을 반환하는 함수, 즉 컴포넌트를 만들어 주고 이것을 다른 곳에서 사용할 수 있게 export해줌!
+
+App.js
+
+```js
+import ExpenseItem from "./components/ExpenseItem";
+
+function App() {
+  return (
+    <div>
+      <h2>Let's get started!</h2>
+      <ExpenseItem></ExpenseItem>
+      <p>This is also visible!</p>
+    </div>
+  );
+}
+
+export default App;
+
+```
+
+그리고 이걸 `App.js`에 삽입시켜줌. 이제 우리는 컴포넌트를 html처럼 사용 가능함!   
+그렇기 때문에 사용지 지정 컴포넌트는 항상 대문자로 작성해야함   
+그래야 리액트가 컴포넌트를 감지할 수 있기 때문.
+
+다양한 것을 작성하기 위해 `ExpenseItem.js`을 바꿔보자!
+
+```js
+function ExpenseItem() {
+    return (
+    <div>
+        <div>2022.03.04</div>
+        <div>
+            <h2>Car Insurance</h2>
+            <div>$294.67</div>
+        </div>
+    </div>
+    )
+}
+
+export default ExpenseItem;
+```
+
+리액트 컴포넌트를 작성할 때는 중요한 규칙이 하나 있음
+
+반환하는 문장 혹은 JSX코드 조각마다 반드시 한개의 root component를 가진다는 것!
+
+따라서 `<div>`태그 안에 다 넣어주는 식으로 짜면 오류가 없고, 가독성이 좋게 괄호로 감싸주자
+
+---
+
+## CSS
+
+css는 보통 특정한 컴포넌트를 위해 컴포넌트의 자바스크립트 파일이 있는 경로에 추가함.
+
+ExpenseItem.css -> 참조
+
+그러면 이제 css를 js에 적용시켜보자. 
+
+```js
+import './ExpenseItem.css';
+
+function ExpenseItem() {
+    return (
+    <div className="expense-item">
+        <div>2022.03.04</div>
+        <div className="expense-item__description">
+            <h2>Car Insurance</h2>
+            <div className='expense-item__price'>$294.67</div>
+        </div>
+    </div>
+    )
+}
+
+export default ExpenseItem;
+```
+
+여기서 중요한것은 import로 css를 적용시킨다는 것과   
+`class` 대신 `className` 을 쓴다는 것. 왜? html코드가 아니라 JSX, 즉 JS 코드이기 때문
+
+Class는 이미 js에서 사용하는 코드명중 하나 따라서 className을 씀
+
+---
+
+## JSX 동적데이터 출력 & 표현식 작업
+
+사용자로부터 입력받은 것을 동적으로 출력해야함.
+
+하드코드에서 벗어나서 JSX안의 HTML코드 안에 중괄호를 넣음으로써 자바스크립트 코드를 안에 넣어 실행이 가능함.
+```js
+...
+function ExpenseItem() {
+
+    const expenseDate = new Date(2022, 3, 29);
+    const expenseTitle = 'Car Insurance';
+    const expenseAmount = 294.67;
+
+    return (
+    <div className="expense-item">
+        <div>{expenseDate.toISOString()}</div>
+        <div className="expense-item__description">
+            <h2>{expenseTitle}</h2>
+            <div className='expense-item__price'>${expenseAmount}</div>
+        </div>
+    </div>
+    )
+}
+...
+```
+Date 객체는 출력이 안되므로 내장 메소드인 `toISOString`을 해줌
+
+---
+
+## props
+
+`ExpenseItem.js`를 어떻게 재사용할 수 있을까?
+
+단순 복사붙여넣기를 해도 되지만 그러면 항상 똑같은 데이터가 보여지게 됨.
+
+함수에 매개변수를 다르게 해서 다른 입력값에 따라 다른 출력값을 보여주는 것 처럼 리액트도 매개변수와 props라는 개념을 사용해서 쓸 수 있음.
+
+```js
+function App() {
+  const expenses = [
+    {
+      id: 'e1',
+      title: 'Toilet Paper',
+      amount: 94.12,
+      date: new Date(2020, 7, 14),
+    },
+    { id: 'e2', title: 'New TV', amount: 799.49, date: new Date(2021, 2, 12) },
+    {
+      id: 'e3',
+      title: 'Car Insurance',
+      amount: 294.67,
+      date: new Date(2021, 2, 28),
+    },
+    {
+      id: 'e4',
+      title: 'New Desk (Wooden)',
+      amount: 450,
+      date: new Date(2021, 5, 12),
+    },
+  ];
+  return (
+    <div>
+      <h2>Let's get started!</h2>
+      <ExpenseItem 
+        title={expenses[0].title} 
+        amount={expenses[0].amount} 
+        date={expenses[0].date}
+        ></ExpenseItem>
+      <ExpenseItem 
+        title={expenses[1].title} 
+        amount={expenses[1].amount} 
+        date={expenses[1].date}
+        ></ExpenseItem>
+      <ExpenseItem 
+        title={expenses[2].title} 
+        amount={expenses[2].amount} 
+        date={expenses[2].date}
+        ></ExpenseItem>
+      <ExpenseItem 
+        title={expenses[2].title} 
+        amount={expenses[2].amount} 
+        date={expenses[2].date}
+        ></ExpenseItem>
+      <p>This is also visible!</p>
+    </div>
+  );
+}
+```
+
+이걸 이제 ExpenseItem.js에!
+
+
+```js
+...
+function ExpenseItem(props) {
+    return (
+    <div className="expense-item">
+        <div>{props.date.toISOString()}</div>
+        <div className="expense-item__description">
+            <h2>{props.title}</h2>
+            <div className='expense-item__price'>${props.amount}</div>
+        </div>
+    </div>
+    )
+}
+export default ExpenseItem;
+```
+
+이처럼 props는 중요함
+
+재사용이 가능한 컴포넌트를 만들 수 있게 해준 다음 컴포넌트와 컴포넌트 사이에서 데이터를 주고 받게 해줄 수 있기 때문! 
+
+---
+
+## Component에 JS코드 추가
+
+JSX 코드 안에 있는 html문법 안에도 js코드는 실행이 된다. (중괄호 안에서)
+
+하지만 굳이 그렇게 할 필요 없이 가독성 좋게 return 밖에서 상수를 만들어서 해결
+
+```js
+function ExpenseItem(props) {
+
+    const month = props.date.toLocaleString('en-Us', {month: 'long'});
+    const day = props.date.toLocaleString('en-Us', {day: '2-digit'});
+    const year = props.date.getFullYear();
+
+    return (
+    <div className="expense-item">
+        <div>
+            <div>{month}</div>
+            <div>{year}</div>
+            <div>{day}</div>
+        </div>
+        <div className="expense-item__description">
+            <h2>{props.title}</h2>
+            <div className='expense-item__price'>${props.amount}</div>
+        </div>
+    </div>
+    )
+}
+```
+
+## Component 분할
+
+컴포넌트를 분리하기위해 `ExpenseDate.js`를 생성
+
+
+ExpenseDate.js
+```js
+function ExpenseDate(props) {
+    const month = props.date.toLocaleString('en-Us', {month: 'long'});
+    const day = props.date.toLocaleString('en-Us', {day: '2-digit'});
+    const year = props.date.getFullYear();
+
+    return (
+        <div>
+            <div>{month}</div>
+            <div>{year}</div>
+            <div>{day}</div>
+        </div>
+    );
+}
+```
+
+이처럼 분리하는건 별로 어렵지 않음!
+
+하지만 ExpenseDate 컴포넌트에 props가 있어야 하는것은 기억!
+
+
+우리는 컴포넌트가 중첩되어 있기 때문에 마찬가지로 데이터를 주고받는, props도 중첩되고 있음을 기억해야함. App.js 에서 데이터를 넘기면 props를 통해 ExponseItem.js로 넘어가고 그것은 다시 props를 통해 ExponseDate.js로 넘어가게 됨. 
+
+따라서 `ExpenseItem.js`는 이런구조
+
+```js
+...
+function ExpenseItem(props) {
+
+    return (
+    <div className="expense-item">
+        <ExpenseDate date={props.date}/>
+        <div className="expense-item__description">
+            <h2>{props.title}</h2>
+            <div className='expense-item__price'>${props.amount}</div>
+        </div>
+    </div>
+    )
+}
+...
+```
+
+이후 css 추가해주고 다듬어주자
+
+ExpenseDate.js
+```js
+import './ExpenseDate.css';
+
+function ExpenseDate(props) {
+    const month = props.date.toLocaleString('en-Us', {month: 'long'});
+    const day = props.date.toLocaleString('en-Us', {day: '2-digit'});
+    const year = props.date.getFullYear();
+
+    return (
+        <div className='expense-date'>
+            <div className='expense-date__month'>{month}</div>
+            <div className='expense-date__year'>{year}</div>
+            <div className='expense-date__day'>{day}</div>
+        </div>
+    );
+}
+
+export default ExpenseDate;
+```
+
+그러면 과제로 준 것도 해결해보자. `App.js`간단화!
+
+`Expense.js`를 만들어 준 다음 이렇게 처리하자.
+
+```js
+import ExpenseItem from './ExpenseItem';
+import './Expenses.css';
+
+function Expenses(props) {
+    
+    return (
+        <div className='expenses'>
+        <ExpenseItem 
+            title={props.items[0].title} 
+            amount={props.items[0].amount} 
+            date={props.items[0].date}
+         />
+        <ExpenseItem 
+            title={props.items[1].title} 
+            amount={props.items[1].amount} 
+            date={props.items[1].date}
+         />
+        <ExpenseItem 
+            title={props.items[2].title} 
+            amount={props.items[2].amount} 
+            date={props.items[2].date}
+         />
+        <ExpenseItem 
+            title={props.items[2].title} 
+            amount={props.items[2].amount} 
+            date={props.items[2].date}
+         />
+        </div>
+    );
+}
+
+export default Expenses;
+```
+
+복잡해 보이지만 `App.js`에 있던 것을 거의 그대로 옮겼을 뿐이고, 로직은 동일하다.
+
+단 props를 받은 다음 안에 있는 객체의 값을 다시 던져줘야 한다.
+
+따라서 props뒤에 객체를 던져준다는 의미로 items를 붙여준다. (이름은 자유다!) 
+
+이제 `App.js`를 간단화 하자.
+
+App.js
+```js
+import Expenses from "./components/Expenses";
+
+function App() {
+  const expenses = [
+    ...
+  ];
+  
+  return (
+    <div>
+      <h2>Let's get started!</h2>
+      <Expenses items={expenses} />
+      <p>This is also visible!</p>
+    </div>
+  );
+}
+
+export default App;
+
+```
+이후 Expenses에서 items에 어떤 객체를 넣을지 제시가 되어 있으므로 중괄호를 넣고 객체인 expenses를 넣어준다. 
