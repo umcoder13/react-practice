@@ -537,3 +537,119 @@ export default App;
 
 ```
 이후 Expenses에서 items에 어떤 객체를 넣을지 제시가 되어 있으므로 중괄호를 넣고 객체인 expenses를 넣어준다. 
+
+
+---
+## Concept of Component 
+
+컴포넌트의 역할이란?   
+1. JSX 코드를 결합한 자용자 정의 html
+2. 스타일링
+3. 자바스크립트 로직 추가 가능
+
+많은 컴포넌트 블럭으로 사용자 인터페이스를 구축하는 접근방식을 `Composition(합성)`이라고 함.
+
+이런 접근방식을 봤을 때 `ExpenseItem.js`와 `Expense.js`파일에서 모두 가지고 있는 컨테이너 `<div>`와 공통으로 가지고 있는 스타일을 추출 할 수 있음. 
+
+`Card.js`와 `Card.css`를 추가해주자.
+
+Card.js
+```js
+import './Card.css';
+
+function Card() {
+    return <div className="card"></div>
+} 
+
+export default Card;
+```
+
+Card.css
+```css
+.card {
+    border-radius: 12px;
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.25);
+}
+```
+
+이후  `ExpenseItem.css`와 `Expense.css`에서 해당되는 부분을 제거하자.
+
+
+그 후  `ExpenseItem.js`와 `Expense.js`를 이러한 방식으로 수정하게 된다면?
+
+
+```js
+...
+import Card from './Card';
+function ExpenseItem(props) {
+    return (
+    <Card className="expense-item">
+        <ExpenseDate date={props.date}/>
+        <div className="expense-item__description">
+            <h2>{props.title}</h2>
+            <div className='expense-item__price'>${props.amount}</div>
+        </div>
+    </Card>
+    )
+}
+...
+```
+
+`Card.css`에서 정의된 스타일을 자동으로 가지게 됨!
+
+그러나 실제 구현하면 다 사라져있는데 이러한 이유는 사용자 지정 컴포넌트를 컨텐츠를 감싸는 Wrapper로 사용할 수 없기 때문임. 이러한 문제의 해결 방식은?
+
+
+Card.js
+```js
+function Card(props) {
+    return <div className="card">{props.children}</div>
+} 
+```
+
+`props.children`을 쓰는것!
+
+chidren은 예약어!    
+
+A 컴포넌트 사이에 B 컴포넌트가 있을 때, A 컴포넌트에서 B 컴포넌트 내용을 보여주려고 사용하는 props
+
+이러면 적용이 되지만 약간 깨짐. 왜? 안의 class가 적용이 안되기 때문. 
+
+Card에 className props를 설정했는데, Card가 내가 지정한 사용자 지정 컴포넌트이기 때문에 내가 지원하라고 지시한 것만 지원하고 있음.
+
+따라서 Card 컴포넌트 안에 className이 설정되기 원하고 바뀌기 원한다면 약간 수정해야함.
+
+Card.js
+```js
+function Card(props) {
+    const classes = 'card ' + props.className;
+    return <div className={classes}>{props.children}</div>
+} 
+```
+
+동적으로 class의 상수를 가리키도록 설정! 
+
+이제 재사용 가능한 Wrapper 컴포넌트를 만든 것!
+
+다른 것도 수정해주자
+
+Expenses.js
+```js
+...
+import Card from './Card';
+
+function Expenses(props) {
+    return (
+        <Card className='expenses'>
+          ...
+        </Card>
+    );
+}
+...
+```
+
+이렇게 하는, 즉 합성을 하는 이유? 중복코드를 줄일 수 있고 코드르 더 깔끔하게 짤 수 있음.
+
+
+
+
