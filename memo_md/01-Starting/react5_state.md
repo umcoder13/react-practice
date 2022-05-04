@@ -548,7 +548,7 @@ export default App;
 
 `NewExpense.js`에서 생성한 데이터를 `Expenses.js`에 소통해야하는데, 서로 소통이 불가능하기 때문에 부모 컴포넌트인 `App.js`에 데이터를 올려놓고 소통하는 것.
 
-![state](./img/2022-05-03%20145849.png)
+![state](../img/2022-05-03%20145849.png)
 
 ---
 ## Stateless vs Stateful Component
