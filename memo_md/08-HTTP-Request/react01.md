@@ -468,5 +468,56 @@ export default App;
 
 데이터가 배열이 아니라 객체로 받았기 때문이다.
 
-따라서 우리는 
+따라서 우리는 map을 다른 방식으로 바꿔야한다. for과 push를 써서 바꿔보자.
 
+_App.js_
+```js
+...
+
+function App() {
+  ...
+
+  const fetchMoviesHandler = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(URL);
+      if (!response.ok) {
+        throw new Error('Something went wrong!');
+      }
+
+      const data = await response.json();
+
+      const loadedMovies = [];
+
+      for (const key in data) {
+        loadedMovies.push({
+          id: key,
+          title: data[key].title,
+          openingText: data[key].openingText,
+          releaseDate: data[key].releaseDate,
+        });
+      }
+
+      setMovies(loadedMovies);
+    } catch (error) {
+      setError(error.message);
+    }
+    setIsLoading(false);
+  }, []);
+
+  useEffect(() => {
+    fetchMoviesHandler();
+  }, [fetchMoviesHandler]);
+
+  ...
+
+  return (
+    ...
+  );
+}
+
+export default App;
+```
+
+정상적으로 된다!
