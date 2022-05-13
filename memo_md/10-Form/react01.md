@@ -678,6 +678,9 @@ const SimpleInput = (props) => {
 };
 
 export default SimpleInput;
-
 ```
+
+## 커스텀훅 생성
+
+보면 중복되는 로직이 많으므로, 로직을 아웃소싱하자.
 
